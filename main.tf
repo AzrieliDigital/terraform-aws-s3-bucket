@@ -6,7 +6,7 @@ locals {
 
   # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
   # inputs grouped under s3_replica[tion]
-  s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
+  #s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
 }
@@ -158,7 +158,7 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  dynamic "replication_configuration" {
+/*   dynamic "replication_configuration" {
     for_each = local.replication_enabled ? [1] : []
 
     content {
@@ -241,7 +241,7 @@ resource "aws_s3_bucket" "default" {
         }
       }
     }
-  }
+  } */
 
   dynamic "object_lock_configuration" {
     for_each = var.object_lock_configuration != null ? [1] : []
