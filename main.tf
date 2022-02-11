@@ -158,55 +158,55 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-/*   dynamic "replication_configuration" {
-    for_each = local.replication_enabled ? [1] : []
+  dynamic "replication_configuration" {
+    #for_each = local.replication_enabled ? [1] : []
 
     content {
-      role = aws_iam_role.replication[0].arn
+      #role = aws_iam_role.replication[0].arn
 
       dynamic "rules" {
-        for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
+        #for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
 
         content {
-          id       = rules.value.id
-          priority = try(rules.value.priority, 0)
+          #id       = rules.value.id
+          #priority = try(rules.value.priority, 0)
           # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
           # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
           # is required even if it empty, so we always implement `prefix` as a filter.
           # OBSOLETE: prefix   = try(rules.value.prefix, null)
-          status = try(rules.value.status, null)
+          #status = try(rules.value.status, null)
           # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
-          delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
+          #delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
 
           destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
             # s3_replica_bucket_arn to specify single destination for all rules
-            bucket             = try(length(rules.value.destination_bucket), 0) > 0 ? rules.value.destination_bucket : var.s3_replica_bucket_arn
-            storage_class      = try(rules.value.destination.storage_class, "STANDARD")
-            replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
-            account_id         = try(rules.value.destination.account_id, null)
+            #bucket             = try(length(rules.value.destination_bucket), 0) > 0 ? rules.value.destination_bucket : var.s3_replica_bucket_arn
+            #storage_class      = try(rules.value.destination.storage_class, "STANDARD")
+            #replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
+            #account_id         = try(rules.value.destination.account_id, null)
 
             # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
-            dynamic "metrics" {
-              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+            #dynamic "metrics" {
+            #  for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
-              content {
-                status = "Enabled"
-                # Minutes can only have 15 as a valid value.
-                minutes = 15
-              }
-            }
+            #  content {
+            #    status = "Enabled"
+            #    # Minutes can only have 15 as a valid value.
+            #    minutes = 15
+            #  }
+            #}
 
             # This block is required when replication metrics are enabled.
-            dynamic "replication_time" {
-              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+            #dynamic "replication_time" {
+            #  for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
-              content {
-                status = "Enabled"
+            #  content {
+            #    status = "Enabled"
                 # Minutes can only have 15 as a valid value.
-                minutes = 15
-              }
-            }
+            #    minutes = 15
+            #  }
+            #}
 
             dynamic "access_control_translation" {
               for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
@@ -241,7 +241,7 @@ resource "aws_s3_bucket" "default" {
         }
       }
     }
-  } */
+  }
 
   dynamic "object_lock_configuration" {
     for_each = var.object_lock_configuration != null ? [1] : []
