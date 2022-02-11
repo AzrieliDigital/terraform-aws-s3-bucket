@@ -158,16 +158,16 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  dynamic "replication_configuration" {
+  #dynamic "replication_configuration" {
     #for_each = local.replication_enabled ? [1] : []
 
-    content {
+    #content {
       #role = aws_iam_role.replication[0].arn
 
-      dynamic "rules" {
+    #  dynamic "rules" {
         #for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
 
-        content {
+    #    content {
           #id       = rules.value.id
           #priority = try(rules.value.priority, 0)
           # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
@@ -178,7 +178,7 @@ resource "aws_s3_bucket" "default" {
           # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
           #delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
 
-          destination {
+    #      destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
             # s3_replica_bucket_arn to specify single destination for all rules
             #bucket             = try(length(rules.value.destination_bucket), 0) > 0 ? rules.value.destination_bucket : var.s3_replica_bucket_arn
@@ -208,40 +208,40 @@ resource "aws_s3_bucket" "default" {
             #  }
             #}
 
-            dynamic "access_control_translation" {
-              for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
+  #          dynamic "access_control_translation" {
+  #            for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
+  #
+  #            content {
+  #              owner = access_control_translation.value
+  #            }
+  #          }
+  #        }
 
-              content {
-                owner = access_control_translation.value
-              }
-            }
-          }
+  #        dynamic "source_selection_criteria" {
+  #          for_each = try(rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
 
-          dynamic "source_selection_criteria" {
-            for_each = try(rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
-
-            content {
-              sse_kms_encrypted_objects {
-                enabled = source_selection_criteria.value
-              }
-            }
-          }
+  #          content {
+  #            sse_kms_encrypted_objects {
+  #              enabled = source_selection_criteria.value
+  #            }
+  #          }
+  #        }
 
           # Replication to multiple destination buckets requires that priority is specified in the rules object.
           # If the corresponding rule requires no filter, an empty configuration block filter {} must be specified.
           # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
-          dynamic "filter" {
-            for_each = try(rules.value.filter, null) == null ? [{ prefix = null, tags = {} }] : [rules.value.filter]
-
-            content {
-              prefix = try(filter.value.prefix, try(rules.value.prefix, null))
-              tags   = try(filter.value.tags, {})
-            }
-          }
-        }
-      }
-    }
-  }
+  #        dynamic "filter" {
+  #          for_each = try(rules.value.filter, null) == null ? [{ prefix = null, tags = {} }] : [rules.value.filter]
+  #
+  #          content {
+  #            prefix = try(filter.value.prefix, try(rules.value.prefix, null))
+  #            tags   = try(filter.value.tags, {})
+  #          }
+  #        }
+  #      }
+  #    }
+  #  }
+  #}
 
   dynamic "object_lock_configuration" {
     for_each = var.object_lock_configuration != null ? [1] : []
@@ -340,39 +340,39 @@ data "aws_iam_policy_document" "bucket_policy" {
     }
   }
 
-  dynamic "statement" {
-    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
+  #dynamic "statement" {
+  #  for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
-    content {
-      sid = "CrossAccountReplicationObjects"
-      actions = [
-        "s3:ReplicateObject",
-        "s3:ReplicateDelete",
-        "s3:ReplicateTags",
-        "s3:GetObjectVersionTagging",
-        "s3:ObjectOwnerOverrideToBucketOwner"
-      ]
-      resources = ["${local.bucket_arn}/*"]
-      principals {
-        type        = "AWS"
-        identifiers = var.s3_replication_source_roles
-      }
-    }
-  }
+  #  content {
+  #    sid = "CrossAccountReplicationObjects"
+  #    actions = [
+  #      "s3:ReplicateObject",
+  #      "s3:ReplicateDelete",
+  #      "s3:ReplicateTags",
+  #      "s3:GetObjectVersionTagging",
+  #      "s3:ObjectOwnerOverrideToBucketOwner"
+  #    ]
+  #    resources = ["${local.bucket_arn}/*"]
+  #    principals {
+  #      type        = "AWS"
+  #      identifiers = var.s3_replication_source_roles
+  #    }
+  #  }
+  #}
 
-  dynamic "statement" {
-    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
+  #dynamic "statement" {
+  #  for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
-    content {
-      sid       = "CrossAccountReplicationBucket"
-      actions   = ["s3:List*", "s3:GetBucketVersioning", "s3:PutBucketVersioning"]
-      resources = [local.bucket_arn]
-      principals {
-        type        = "AWS"
-        identifiers = var.s3_replication_source_roles
-      }
-    }
-  }
+  #  content {
+  #    sid       = "CrossAccountReplicationBucket"
+  #    actions   = ["s3:List*", "s3:GetBucketVersioning", "s3:PutBucketVersioning"]
+  #    resources = [local.bucket_arn]
+  #    principals {
+  #      type        = "AWS"
+  #      identifiers = var.s3_replication_source_roles
+  #    }
+  #  }
+  #}
 
   dynamic "statement" {
     for_each = keys(var.privileged_principal_arns)
@@ -399,7 +399,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]
